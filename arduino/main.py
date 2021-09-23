@@ -3,8 +3,8 @@
 @created by cemakpolat at 2021-09-13
 """
 
-import serial
-import time, dbface
+import time
+from arduino import dbface
 
 
 def is_card_permitted(cardid, doorid):

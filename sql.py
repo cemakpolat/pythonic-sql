@@ -417,7 +417,6 @@ class Select(DBConfig):
             connection.commit()
             result = cursor.fetchall()
             self.result = result
-            print(self.result[0])
 
         except mysql.connector.Error as error:
             print("Failed to create table in MySQL: {}".format(error))
@@ -584,16 +583,3 @@ class Delete(DBConfig):
         self.drop_table = False
         self.sql = None
         self.wheres = []
-
-records = [("cem","akpolat")]
-insert = Insert("arduino", "arduino", "127.0.0.1", "university")
-#insert.table('reviewers').columns(["name", "surname"], records).apply()
-insert.table('reviewers').column("name", "levin").column("surname", "levin").apply()
-
-
-
-
-# select = Select("arduino", "arduino", "127.0.0.1", "university")
-# select.table("reviewers").columns(["*"]).where(["id=6"]).apply()
-#     where(["10<=!price!=<20","categortyid!=[1,2,3]","a!=b","c>d","d<x | d=y | a=b","w=m","t=m","column ~ a"]).orderby("a.column","ASC").\
-#     apply()

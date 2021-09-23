@@ -2,7 +2,7 @@
 @author: Cem Akpolat
 @created by cemakpolat at 2021-09-23
 """
-
+from sql import *
 
 create = Create("arduino", "arduino", "127.0.0.1", "university")
 create.table("reviewers").\
@@ -39,7 +39,6 @@ insert.table('reviewers').column("name", "levin").column("surname", "levin").app
 select = Select("arduino", "arduino", "127.0.0.1", "university")
 select.table("reviewers").columns(["*"]).where(["id=6"]).apply()
 
-select = Select()
 select.table("a").columns(["a","b"]).innerjoin("table","a.id=b.id").leftjoin("c","b.id=c.id").\
     where(["10<=!price!=<20","categortyid!=[1,2,3]","a!=b","c>d","d<x | d=y | a=b","w=m","t=m","column ~ a"]).orderby("a.column","ASC").\
     apply()
@@ -50,6 +49,6 @@ update.table("reviewers").columns(["name","surname"],["aren","aren"]).where("id=
 update.table("reviewers").column("name","aren").column("surname","aren").where("id=7").apply()
 
 
-#delete = Delete("arduino", "arduino", "127.0.0.1", "university")
-#delete.table("reviewers").where("id=17").apply()
-# delete.table("reviewers")
+delete = Delete("arduino", "arduino", "127.0.0.1", "university")
+delete.table("reviewers").where("id=17").apply()
+delete.table("reviewers")
