@@ -271,6 +271,7 @@ class Select(DBConfig):
         self.likes = []
         self.betweens = []
         self.result = None
+        self.limit_val = None
 
 
     def table(self, name):
@@ -282,6 +283,7 @@ class Select(DBConfig):
         return self
 
     def columns(self, col_array):
+
         for col in col_array:
             if col in self.column_names:
                 continue
@@ -299,6 +301,11 @@ class Select(DBConfig):
             self.order_bys.append({"column": column, "operator": operator})
         else:
             print("invalid operator")
+        return self
+
+    def limit(self, value):
+
+        self.limit_val = value
         return self
 
     def where(self, conditions):
@@ -395,16 +402,21 @@ class Select(DBConfig):
             where += "(" + item + ")" + " AND "
         self.sql += where[:-5]
 
+        groupby = ""
+        for item in self.group_bys:
+            groupby += " GROUP BY " + item
+        self.sql += groupby
+
         orderby = ""
         for item in self.order_bys:
             orderby += " ORDER BY " + item["column"] + " " + item["operator"]
 
         self.sql += orderby
 
-        groupby = ""
-        for item in self.group_bys:
-            groupby += " GROUP BY " + item
-        self.sql += groupby
+        if self.limit:
+            self.sql += " LIMIT " + self.limit_val
+
+        self.sql += ";"
 
         self.execute()
 
@@ -417,6 +429,7 @@ class Select(DBConfig):
             connection.commit()
             result = cursor.fetchall()
             self.result = result
+            print(self.result)
 
         except mysql.connector.Error as error:
             print("Failed to create table in MySQL: {}".format(error))
@@ -438,6 +451,7 @@ class Select(DBConfig):
         self.sql = None
         self.likes = []
         self.betweens = []
+        self.limit_val = None
 
 
 class Update(DBConfig):
@@ -463,14 +477,32 @@ class Update(DBConfig):
     def column(self, cname, value):
         if type(value) is str:
             value = "\""+value+"\""
-        self.column_values.append(cname + " = " + value)
+        self.column_values.append(cname + " = " + str(value))
         return self
 
     def where(self, condition):
-        if "<" in condition or ">" in condition or "=" in condition or ">=" in condition or "<=" in condition or "<>" in condition:
-            self.wheres.append(condition)
+
+        if type(condition) is str:
+            seperator = None
+            if "<" in condition:
+                seperator = "<"
+            elif ">" in condition:
+                seperator = ">"
+            elif "=" in condition:
+                seperator = "="
+            elif ">=" in condition:
+                seperator = ">="
+            elif "<=" in condition:
+                seperator = "<="
+            elif "<>" in condition:
+                seperator = "<>"
+            else:
+                print("invalid operator")
+            if seperator:
+                condition = condition.split("=")[0]+" = \"" + condition.split("=")[1] + "\""
+                self.wheres.append(condition)
         else:
-            print("invalid operator")
+            self.wheres.append(condition)
         return self
 
     def apply(self):
@@ -492,8 +524,8 @@ class Update(DBConfig):
         if len(self.wheres) > 0:
             where = ""
             for item in self.wheres:
-                where += item + ","
-            self.sql += where[:-1]
+                where += item + " AND "
+            self.sql += where[:-5]
             print(self.sql)
             self.execute()
         else:
@@ -510,7 +542,6 @@ class Update(DBConfig):
         finally:
             if connection.is_connected():
                 connection.close()
-                #  cursor.close()
                 print("MySQL connection is closed")
 
         self.clean()
